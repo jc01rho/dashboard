@@ -21,7 +21,7 @@ TMP_DIR="${ROOT_DIR}/.tmp"
 SRC_DIR="${ROOT_DIR}/src"
 FRONTEND_DIR="${TMP_DIR}/frontend"
 FRONTEND_SRC="${SRC_DIR}/app/frontend"
-DIST_DIR="${ROOT_DIR}/dist"
+DIST_DIR="${ROOT_DIR}/dist/linux"
 CACHE_DIR="${ROOT_DIR}/.cached_tools"
 
 # Binaries.
