@@ -26,11 +26,11 @@ ENABLE_INSECURE_LOGIN ?= false
 ENABLE_SKIP_LOGIN ?= false
 SYSTEM_BANNER ?= "Local test environment"
 SYSTEM_BANNER_SEVERITY ?= INFO
-PROD_BINARY = dist/amd64/dashboard
+PROD_BINARY = dist/linux/amd64/dashboard
 SERVE_DIRECTORY = .tmp/serve
 SERVE_BINARY = .tmp/serve/dashboard
-RELEASE_IMAGE = kubernetesui/dashboard
-RELEASE_VERSION = v2.7.0
+RELEASE_IMAGE = ghcr.io/jc01rho/dashboard
+RELEASE_VERSION = v2.7.1
 RELEASE_IMAGE_NAMES += $(foreach arch, $(ARCHITECTURES), $(RELEASE_IMAGE)-$(arch):$(RELEASE_VERSION))
 RELEASE_IMAGE_NAMES_LATEST += $(foreach arch, $(ARCHITECTURES), $(RELEASE_IMAGE)-$(arch):latest)
 HEAD_IMAGE = kubernetesdashboarddev/dashboard
@@ -115,7 +115,7 @@ prod-backend: clean ensure-go
 .PHONY: prod-backend-cross
 prod-backend-cross: clean ensure-go
 	for ARCH in $(ARCHITECTURES) ; do \
-  	CGO_ENABLED=0 GOOS=linux GOARCH=$$ARCH go build -a -installsuffix cgo -ldflags "-X $(MAIN_PACKAGE)/client.Version=$(RELEASE_VERSION)" -o dist/$$ARCH/dashboard $(MAIN_PACKAGE) ; \
+  	CGO_ENABLED=0 GOOS=linux GOARCH=$$ARCH go build -a -installsuffix cgo -ldflags "-X $(MAIN_PACKAGE)/client.Version=$(RELEASE_VERSION)" -o dist/linux/$$ARCH/dashboard $(MAIN_PACKAGE) ; \
   done
 
 .PHONY: prod
@@ -123,7 +123,7 @@ prod: build
 	$(PROD_BINARY) --kubeconfig=$(KUBECONFIG) \
 		--sidecar-host=$(SIDECAR_HOST) \
 		--auto-generate-certificates \
-		--locale-config=dist/amd64/locale_conf.json \
+		--locale-config=dist/linux/amd64/locale_conf.json \
 		--bind-address=${BIND_ADDRESS} \
 		--port=${PORT}
 
@@ -250,15 +250,14 @@ docker-build-release: build-cross
 			--build-arg BUILDPLATFORM=linux/$$ARCH \
 			--platform linux/$$ARCH \
 			--push \
-			dist/$$ARCH ; \
+			dist/linux/$$ARCH ; \
 	done ; \
 
 .PHONY: docker-push-release
 docker-push-release: docker-build-release
-	docker manifest create --amend $(RELEASE_IMAGE):$(RELEASE_VERSION) $(RELEASE_IMAGE_NAMES) ; \
-  docker manifest create --amend $(RELEASE_IMAGE):latest $(RELEASE_IMAGE_NAMES_LATEST) ; \
-  docker manifest push $(RELEASE_IMAGE):$(RELEASE_VERSION) ; \
-  docker manifest push $(RELEASE_IMAGE):latest
+	docker image ls  ; \
+
+
 
 .PHONY: docker-build-head
 docker-build-head: build-cross
@@ -268,7 +267,7 @@ docker-build-head: build-cross
 			--build-arg BUILDPLATFORM=linux/$$ARCH \
 			--platform linux/$$ARCH \
 			--push \
-			dist/$$ARCH ; \
+			dist/linux/$$ARCH ; \
 	done ; \
 
 .PHONY: docker-push-head

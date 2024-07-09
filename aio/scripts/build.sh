@@ -60,6 +60,7 @@ function build::backend::cross {
 
 function copy::frontend {
   say "\nCopying frontend to backend dist dir"
+  mkdir -p ${DIST_DIR}
   languages=($(ls ${FRONTEND_DIR}))
   architectures=($(ls ${DIST_DIR}))
   for arch in "${architectures[@]}"; do
